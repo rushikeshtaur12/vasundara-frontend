@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 
 export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
-  
-  
   const [name, setName] = useState("");
   const [year, setYear] = useState("");
   const [country, setCountry] = useState("");
   const [brandImage, setBrandImage] = useState(null);
   const [vehicles, setVehicles] = useState([]);
+  const [vehiclesToDelete, setVehiclesToDelete] = useState([]);
 
   useEffect(() => {
     if (brandToEdit) {
@@ -17,15 +16,18 @@ export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
       setVehicles(
         (brandToEdit.vehicles || []).map((v, idx) => ({
           ...v,
-          tempId: idx, // tempId needed for file mapping
+          tempId: idx, // tempId needed for mapping files
         }))
       );
+      setVehiclesToDelete([]);
+      setBrandImage(null);
     } else {
       setName("");
       setYear("");
       setCountry("");
       setBrandImage(null);
       setVehicles([]);
+      setVehiclesToDelete([]);
     }
   }, [brandToEdit]);
 
@@ -39,10 +41,17 @@ export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
 
   // Remove vehicle
   const removeVehicle = (tempId) => {
+    const vehicle = vehicles.find((v) => v.tempId === tempId);
+
+    // If existing vehicle (_id), mark it for deletion
+    if (vehicle && vehicle._id) {
+      setVehiclesToDelete([...vehiclesToDelete, vehicle._id]);
+    }
+
     setVehicles(vehicles.filter((v) => v.tempId !== tempId));
   };
 
-  // Handle vehicle change
+  // Handle vehicle field change
   const handleVehicleChange = (tempId, key, value) => {
     setVehicles(
       vehicles.map((v) =>
@@ -58,25 +67,29 @@ export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
     formData.append("name", name);
     formData.append("year", year);
     formData.append("country", country);
-    formData.append("is_exist", true); // automatically add
-
+    formData.append("is_exist", true); // default true
+    // formData.append("vehiclesToDelete", JSON.stringify(vehiclesToDelete));
     if (brandImage) formData.append("brandImage", brandImage);
 
+    // Handle vehicles
     const vehiclesData = vehicles
-      .filter((v) => v.name && v.price) // only valid vehicles
+      .filter((v) => v.name && v.price)
       .map((v) => {
         if (v.image) formData.append(`vehicleImage_${v.tempId}`, v.image);
-        const vehiclePayload = {
+        const payload = {
           tempId: v.tempId,
           name: v.name,
           price: v.price,
           color: v.color,
         };
-        if (v._id) vehiclePayload.id = v._id; // existing vehicle
-        return vehiclePayload;
+        if (v._id) payload.id = v._id; // existing vehicle
+        return payload;
       });
 
     formData.append("vehicles", JSON.stringify(vehiclesData));
+
+    // Include vehicles to delete
+    formData.append("vehiclesToDelete", JSON.stringify(vehiclesToDelete));
 
     onSubmit(formData);
     onClose();
@@ -91,6 +104,7 @@ export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
           {brandToEdit ? "Edit Brand" : "Add Brand"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Brand Fields */}
           <input
             type="text"
             placeholder="Brand Name"
@@ -123,6 +137,7 @@ export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
             />
           </div>
 
+          {/* Vehicles */}
           <div className="mt-4">
             <h3 className="font-semibold mb-2">Vehicles</h3>
             {vehicles.map((v) => (
@@ -185,7 +200,6 @@ export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
                 </div>
               </div>
             ))}
-
             <button
               type="button"
               onClick={addVehicle}
@@ -195,6 +209,7 @@ export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
             </button>
           </div>
 
+          {/* Buttons */}
           <div className="flex justify-end gap-3 mt-4">
             <button
               type="button"
