@@ -34,6 +34,7 @@ export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
     formData.append("name", name);
     formData.append("year", year);
     formData.append("country", country);
+      formData.append("is_exist", true);
     if (brandImage) formData.append("brandImage", brandImage);
 
     const vehiclesData = vehicles.map((v) => {

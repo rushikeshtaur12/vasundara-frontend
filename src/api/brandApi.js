@@ -8,7 +8,7 @@ export const getAllBrands = async () => {
 
 // CREATE brand + vehicles
 export const createBrand = async (formData) => {
-  const res = await api.post("/brands", formData, {
+  const res = await api.post("/brands/create", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return res.data;
