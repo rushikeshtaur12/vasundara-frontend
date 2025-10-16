@@ -20,7 +20,7 @@ export const BrandTable = ({ brands, onEdit, onSoftDelete, onRestore, onDelete }
               {b.image &&
                 <img
                   // src={`http://localhost:5000/uploads/${b.image}`}  // for local
-                  src={`vasundhara-backend-production.up.railway.app/uploads/${b.image}`}
+                  src={`https://vasundhara-backend-production.up.railway.app/uploads/${b.image}`}
                   alt="brand"
                   className="w-10 h-10 rounded-full object-cover"
                   onError={(e) => {
@@ -44,7 +44,7 @@ export const BrandTable = ({ brands, onEdit, onSoftDelete, onRestore, onDelete }
                   
                   <img
                   // src={`http://localhost:5000/uploads/${v.image}`} alt="vehicle" className="w-6 h-6 rounded" // for local
-                  src={`vasundhara-backend-production.up.railway.app/uploads/${v.image}`} alt="vehicle" className="w-6 h-6 rounded" 
+                  src={`https://vasundhara-backend-production.up.railway.app/uploads/${v.image}`} alt="vehicle" className="w-6 h-6 rounded" 
                   onError={(e) => {
                     e.target.onerror = null; // prevents infinite loop
                     e.target.src = "https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?cs=srgb&dl=pexels-souvenirpixels-417074.jpg&fm=jpg"; // fallback image URL
