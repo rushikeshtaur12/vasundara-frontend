@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { VehicleInput } from "./VehicleInput";
 
 export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
+  
+  
   const [name, setName] = useState("");
   const [year, setYear] = useState("");
   const [country, setCountry] = useState("");
@@ -10,69 +11,209 @@ export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
 
   useEffect(() => {
     if (brandToEdit) {
-      setName(brandToEdit.name);
-      setYear(brandToEdit.year);
-      setCountry(brandToEdit.country);
-      setVehicles(brandToEdit.vehicles.map((v, idx) => ({ ...v, tempId: idx, image: null })));
+      setName(brandToEdit.name || "");
+      setYear(brandToEdit.year || "");
+      setCountry(brandToEdit.country || "");
+      setVehicles(
+        (brandToEdit.vehicles || []).map((v, idx) => ({
+          ...v,
+          tempId: idx, // tempId needed for file mapping
+        }))
+      );
     } else {
-      setVehicles([{ tempId: 0, name: "", price: "", color: [], image: null }]);
+      setName("");
+      setYear("");
+      setCountry("");
+      setBrandImage(null);
+      setVehicles([]);
     }
   }, [brandToEdit]);
 
-  const handleVehicleChange = (idx, field, value) => {
-    const newVehicles = [...vehicles];
-    newVehicles[idx][field] = value;
-    setVehicles(newVehicles);
+  // Add new vehicle
+  const addVehicle = () => {
+    setVehicles([
+      ...vehicles,
+      { tempId: vehicles.length, name: "", price: "", color: [], image: null },
+    ]);
   };
 
-  const handleAddVehicle = () => setVehicles([...vehicles, { tempId: vehicles.length, name: "", price: "", color: [], image: null }]);
-  const handleRemoveVehicle = (idx) => setVehicles(vehicles.filter((_, i) => i !== idx));
+  // Remove vehicle
+  const removeVehicle = (tempId) => {
+    setVehicles(vehicles.filter((v) => v.tempId !== tempId));
+  };
 
-const handleSubmit = (e) => {
-  e.preventDefault();
-  const formData = new FormData();
-  formData.append("name", name);
-  formData.append("year", year);
-  formData.append("country", country);
-  formData.append("is_exist", true); // auto add
+  // Handle vehicle change
+  const handleVehicleChange = (tempId, key, value) => {
+    setVehicles(
+      vehicles.map((v) =>
+        v.tempId === tempId ? { ...v, [key]: value } : v
+      )
+    );
+  };
 
-  if (brandImage) formData.append("brandImage", brandImage);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData();
 
-  // Only include vehicles with valid name & price
-  const vehiclesData = vehicles
-    .filter(v => v.name && v.price) // skip empty vehicles
-    .map((v) => {
-      if (v.image) formData.append(`vehicleImage_${v.tempId}`, v.image);
-      return { tempId: v.tempId, name: v.name, price: v.price, color: v.color };
-    });
+    formData.append("name", name);
+    formData.append("year", year);
+    formData.append("country", country);
+    formData.append("is_exist", true); // automatically add
 
-  formData.append("vehicles", JSON.stringify(vehiclesData));
+    if (brandImage) formData.append("brandImage", brandImage);
 
-  onSubmit(formData);
-  onClose();
-};
+    const vehiclesData = vehicles
+      .filter((v) => v.name && v.price) // only valid vehicles
+      .map((v) => {
+        if (v.image) formData.append(`vehicleImage_${v.tempId}`, v.image);
+        const vehiclePayload = {
+          tempId: v.tempId,
+          name: v.name,
+          price: v.price,
+          color: v.color,
+        };
+        if (v._id) vehiclePayload.id = v._id; // existing vehicle
+        return vehiclePayload;
+      });
 
+    formData.append("vehicles", JSON.stringify(vehiclesData));
+
+    onSubmit(formData);
+    onClose();
+  };
+
+  if (!isOpen) return null;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-xl font-bold">{brandToEdit ? "Edit Brand" : "Add Brand"}</h2>
-      <input type="text" placeholder="Brand Name" value={name} onChange={(e) => setName(e.target.value)} className="border p-2 rounded w-full" required/>
-      <input type="number" placeholder="Year" value={year} onChange={(e) => setYear(e.target.value)} className="border p-2 rounded w-full" required/>
-      <input type="text" placeholder="Country" value={country} onChange={(e) => setCountry(e.target.value)} className="border p-2 rounded w-full"  required/>
-      <input type="file" onChange={(e) => setBrandImage(e.target.files[0])} />
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg w-full max-w-3xl overflow-y-auto max-h-[90vh]">
+        <h2 className="text-xl font-bold mb-4">
+          {brandToEdit ? "Edit Brand" : "Add Brand"}
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            placeholder="Brand Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+            required
+          />
+          <input
+            type="number"
+            placeholder="Year"
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+            required
+          />
+          <input
+            type="text"
+            placeholder="Country"
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+            required
+          />
+          <div>
+            <label className="block mb-1">Brand Image</label>
+            <input
+              type="file"
+              onChange={(e) => setBrandImage(e.target.files[0])}
+            />
+          </div>
 
-      <h3 className="font-semibold mt-4">Vehicles</h3>
-      {vehicles.map((v, idx) => (
-        <VehicleInput
-          key={v.tempId}
-          vehicle={v}
-          onChange={(field, value) => handleVehicleChange(idx, field, value)}
-          onRemove={() => handleRemoveVehicle(idx)}
-        />
-      ))}
+          <div className="mt-4">
+            <h3 className="font-semibold mb-2">Vehicles</h3>
+            {vehicles.map((v) => (
+              <div
+                key={v.tempId}
+                className="border rounded p-3 mb-3 flex flex-col gap-2"
+              >
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Vehicle Name"
+                    value={v.name}
+                    onChange={(e) =>
+                      handleVehicleChange(v.tempId, "name", e.target.value)
+                    }
+                    className="flex-1 border rounded px-2 py-1"
+                    required
+                  />
+                  <input
+                    type="number"
+                    placeholder="Price"
+                    value={v.price}
+                    onChange={(e) =>
+                      handleVehicleChange(v.tempId, "price", e.target.value)
+                    }
+                    className="w-24 border rounded px-2 py-1"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeVehicle(v.tempId)}
+                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <div>
+                  <label>Vehicle Image</label>
+                  <input
+                    type="file"
+                    onChange={(e) =>
+                      handleVehicleChange(v.tempId, "image", e.target.files[0])
+                    }
+                  />
+                </div>
+                <div>
+                  <label>Color (comma separated)</label>
+                  <input
+                    type="text"
+                    value={v.color.join(",")}
+                    onChange={(e) =>
+                      handleVehicleChange(
+                        v.tempId,
+                        "color",
+                        e.target.value.split(",").map((c) => c.trim())
+                      )
+                    }
+                    className="border rounded px-2 py-1 w-full"
+                  />
+                </div>
+              </div>
+            ))}
 
-      <button type="button" onClick={handleAddVehicle} className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Add Vehicle</button>
-      <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">{brandToEdit ? "Update Brand" : "Create Brand"}</button>
-    </form>
+            <button
+              type="button"
+              onClick={addVehicle}
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            >
+              Add Vehicle
+            </button>
+          </div>
+
+          <div className="flex justify-end gap-3 mt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border rounded"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              {brandToEdit ? "Update" : "Create"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
+
+

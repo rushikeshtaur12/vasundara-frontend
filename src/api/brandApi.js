@@ -24,7 +24,7 @@ export const updateBrand = async (brandId, formData) => {
 
 // SOFT DELETE brand
 export const softDeleteBrand = async (brandId) => {
-  const res = await api.patch(`/brands/${brandId}/soft-delete`);
+  const res = await api.patch(`/brands/soft/${brandId}`);
   return res.data;
 };
 
