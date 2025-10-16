@@ -1,5 +1,6 @@
 import React from "react";
 
+
 export const BrandTable = ({ brands, onEdit, onSoftDelete, onRestore, onDelete }) => {
   return (
     <table className="min-w-full divide-y divide-gray-200">
@@ -16,7 +17,21 @@ export const BrandTable = ({ brands, onEdit, onSoftDelete, onRestore, onDelete }
         {brands.map((b) => (
           <tr key={b._id} className={b.is_deleted ? "bg-gray-100 line-through" : ""}>
             <td className="px-6 py-4 flex items-center gap-2">
-              {b.image && <img src={`http://localhost:5000/uploads/${b.image}`} alt="brand" className="w-10 h-10 rounded-full object-cover"/>}
+              {b.image &&
+                <img
+                  src={`http://localhost:5000/uploads/${b.image}`}
+                  alt="brand"
+                  className="w-10 h-10 rounded-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null; // prevents infinite loop
+                    e.target.src = "https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?cs=srgb&dl=pexels-souvenirpixels-417074.jpg&fm=jpg"; // fallback image URL
+                    
+                    
+                  }}
+                />
+              
+
+              }
               <span className="font-medium">{b.name}</span>
             </td>
             <td className="px-6 py-4">{b.year}</td>
@@ -24,7 +39,20 @@ export const BrandTable = ({ brands, onEdit, onSoftDelete, onRestore, onDelete }
             <td className="px-6 py-4">
               {b.vehicles?.map((v) => (
                 <div key={v._id} className="flex items-center gap-2 mb-1">
-                  {v.image && <img src={`http://localhost:5000/uploads/${v.image}`} alt="vehicle" className="w-6 h-6 rounded"/>}
+                  {v.image && 
+                  // <img 
+                  // src={`http://localhost:5000/uploads/${v.image}`} alt="vehicle" className="w-6 h-6 rounded" 
+                  // />
+                  <img
+                  src={`http://localhost:5000/uploads/${v.image}`} alt="vehicle" className="w-6 h-6 rounded" 
+                  onError={(e) => {
+                    e.target.onerror = null; // prevents infinite loop
+                    e.target.src = "https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?cs=srgb&dl=pexels-souvenirpixels-417074.jpg&fm=jpg"; // fallback image URL
+                    
+                    
+                  }}
+                />
+                  }
                   <span>{v.name} (${v.price})</span>
                 </div>
               ))}

@@ -27,7 +27,13 @@ function App() {
     setModalOpen(false);
   };
   const handleSoftDelete = async (id) => { await softDeleteBrand(id); fetchBrands(); };
-  const handleDelete = async (id) => { await deleteBrand(id); fetchBrands(); };
+  
+  const handleDelete = async (id) => {
+  const confirm = window.confirm("Are you sure you want to permanently delete this brand?");
+  if (!confirm) return;
+  await deleteBrand(id);
+  fetchBrands();
+};
   const handleRestore = fetchBrands;
 
   return (
