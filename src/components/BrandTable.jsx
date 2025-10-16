@@ -31,7 +31,7 @@ export const BrandTable = ({ brands, onEdit, onSoftDelete, onRestore, onDelete }
             ) : (
               <>
                 <button onClick={() => onEdit(b)} className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Edit</button>
-                <button onClick={() => onSoftDelete(b._id)} className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Soft Delete</button>
+                {/* <button onClick={() => onSoftDelete(b._id)} className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Soft Delete</button> */}
                 <button onClick={() => onDelete(b._id)} className="bg-gray-700 text-white px-2 py-1 rounded hover:bg-gray-800">Delete</button>
               </>
             )}

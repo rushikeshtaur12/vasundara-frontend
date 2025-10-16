@@ -28,31 +28,37 @@ export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
   const handleAddVehicle = () => setVehicles([...vehicles, { tempId: vehicles.length, name: "", price: "", color: [], image: null }]);
   const handleRemoveVehicle = (idx) => setVehicles(vehicles.filter((_, i) => i !== idx));
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("year", year);
-    formData.append("country", country);
-      formData.append("is_exist", true);
-    if (brandImage) formData.append("brandImage", brandImage);
+const handleSubmit = (e) => {
+  e.preventDefault();
+  const formData = new FormData();
+  formData.append("name", name);
+  formData.append("year", year);
+  formData.append("country", country);
+  formData.append("is_exist", true); // auto add
 
-    const vehiclesData = vehicles.map((v) => {
+  if (brandImage) formData.append("brandImage", brandImage);
+
+  // Only include vehicles with valid name & price
+  const vehiclesData = vehicles
+    .filter(v => v.name && v.price) // skip empty vehicles
+    .map((v) => {
       if (v.image) formData.append(`vehicleImage_${v.tempId}`, v.image);
       return { tempId: v.tempId, name: v.name, price: v.price, color: v.color };
     });
-    formData.append("vehicles", JSON.stringify(vehiclesData));
 
-    onSubmit(formData);
-    onClose();
-  };
+  formData.append("vehicles", JSON.stringify(vehiclesData));
+
+  onSubmit(formData);
+  onClose();
+};
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-xl font-bold">{brandToEdit ? "Edit Brand" : "Add Brand"}</h2>
-      <input type="text" placeholder="Brand Name" value={name} onChange={(e) => setName(e.target.value)} className="border p-2 rounded w-full" />
-      <input type="number" placeholder="Year" value={year} onChange={(e) => setYear(e.target.value)} className="border p-2 rounded w-full" />
-      <input type="text" placeholder="Country" value={country} onChange={(e) => setCountry(e.target.value)} className="border p-2 rounded w-full" />
+      <input type="text" placeholder="Brand Name" value={name} onChange={(e) => setName(e.target.value)} className="border p-2 rounded w-full" required/>
+      <input type="number" placeholder="Year" value={year} onChange={(e) => setYear(e.target.value)} className="border p-2 rounded w-full" required/>
+      <input type="text" placeholder="Country" value={country} onChange={(e) => setCountry(e.target.value)} className="border p-2 rounded w-full"  required/>
       <input type="file" onChange={(e) => setBrandImage(e.target.files[0])} />
 
       <h3 className="font-semibold mt-4">Vehicles</h3>
