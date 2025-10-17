@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-
 export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
   const [name, setName] = useState("");
   const [year, setYear] = useState("");
@@ -16,7 +15,9 @@ export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
       setVehicles(
         (brandToEdit.vehicles || []).map((v, idx) => ({
           ...v,
-          tempId: idx, // tempId needed for mapping files
+          tempId: idx,
+          color: Array.isArray(v.color) ? v.color : [], // ensure array
+          image: null, // file input is always null initially
         }))
       );
       setVehiclesToDelete([]);
@@ -31,7 +32,6 @@ export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
     }
   }, [brandToEdit]);
 
-  // Add new vehicle
   const addVehicle = () => {
     setVehicles([
       ...vehicles,
@@ -39,19 +39,14 @@ export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
     ]);
   };
 
-  // Remove vehicle
   const removeVehicle = (tempId) => {
     const vehicle = vehicles.find((v) => v.tempId === tempId);
-
-    // If existing vehicle (_id), mark it for deletion
-    if (vehicle && vehicle._id) {
+    if (vehicle?._id) {
       setVehiclesToDelete([...vehiclesToDelete, vehicle._id]);
     }
-
     setVehicles(vehicles.filter((v) => v.tempId !== tempId));
   };
 
-  // Handle vehicle field change
   const handleVehicleChange = (tempId, key, value) => {
     setVehicles(
       vehicles.map((v) =>
@@ -67,11 +62,10 @@ export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
     formData.append("name", name);
     formData.append("year", year);
     formData.append("country", country);
-    formData.append("is_exist", true); // default true
-    // formData.append("vehiclesToDelete", JSON.stringify(vehiclesToDelete));
+    formData.append("is_exist", true);
     if (brandImage) formData.append("brandImage", brandImage);
 
-    // Handle vehicles
+    // Handle vehicles dynamically
     const vehiclesData = vehicles
       .filter((v) => v.name && v.price)
       .map((v) => {
@@ -80,15 +74,13 @@ export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
           tempId: v.tempId,
           name: v.name,
           price: v.price,
-          color: v.color,
+          color: v.color, // already array
         };
         if (v._id) payload.id = v._id; // existing vehicle
         return payload;
       });
 
     formData.append("vehicles", JSON.stringify(vehiclesData));
-
-    // Include vehicles to delete
     formData.append("vehiclesToDelete", JSON.stringify(vehiclesToDelete));
 
     onSubmit(formData);
@@ -230,5 +222,3 @@ export const BrandModal = ({ isOpen, onClose, onSubmit, brandToEdit }) => {
     </div>
   );
 };
-
-
