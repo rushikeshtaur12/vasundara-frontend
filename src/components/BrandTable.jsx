@@ -1,4 +1,4 @@
-export const BrandTable = ({ brands, onEdit, onSoftDelete, onRestore, onDelete,loading }) => {
+export const BrandTable = ({ brands, onEdit, onSoftDelete, onRestore, onDelete, loading }) => {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
@@ -63,23 +63,27 @@ export const BrandTable = ({ brands, onEdit, onSoftDelete, onRestore, onDelete,l
                 <td className="px-6 py-4">{b.year}</td>
                 <td className="px-6 py-4">{b.country}</td>
                 <td className="px-6 py-4">
-                  {b.vehicles?.map((v) => (
-                    <div key={v._id} className="flex items-center gap-2 mb-1">
-                      {v.image && (
-                        <img
-                          src={`http://localhost:5000/uploads/${v.image}`}
-                          alt="vehicle"
-                          className="w-6 h-6 rounded"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src =
-                              "https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg";
-                          }}
-                        />
-                      )}
-                      <span>{v.name} (${v.price})</span>
-                    </div>
-                  ))}
+
+                  {b.vehicles.length === 0 ? (
+                    <p className="text-gray-500 text-sm italic">No vehicles added yet for this brand.</p>
+                  ) : (
+                    b.vehicles?.map((v) => (
+                      <div key={v._id} className="flex items-center gap-2 mb-1">
+                        {v.image && (
+                          <img
+                            src={`http://localhost:5000/uploads/${v.image}`}
+                            alt="vehicle"
+                            className="w-6 h-6 rounded"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src =
+                                "https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg";
+                            }}
+                          />
+                        )}
+                        <span>{v.name} (${v.price})</span>
+                      </div>
+                    )))}
                 </td>
                 <td className="px-6 py-4 flex justify-end gap-2">
                   <button

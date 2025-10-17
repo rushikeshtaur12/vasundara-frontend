@@ -86,8 +86,6 @@ function App() {
           onClose={() => setModalOpen(false)}
           onSubmit={handleSubmit}
           brandToEdit={brandToEdit}
-          
-
         />
       </Modal>
     </div>
