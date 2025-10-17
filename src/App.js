@@ -10,30 +10,45 @@ function App() {
   const [brands, setBrands] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [brandToEdit, setBrandToEdit] = useState(null);
+  const [loading, setLoading] = useState(true);
+
 
   const fetchBrands = async () => {
+    setLoading(true);
     const data = await getAllBrands();
     setBrands(data);
+    setLoading(false);
   };
 
   useEffect(() => { fetchBrands(); }, []);
 
-  const handleAdd = () => { setBrandToEdit(null); setModalOpen(true); };
-  const handleEdit = (brand) => { setBrandToEdit(brand); setModalOpen(true); };
+  const handleAdd = () => {
+    setBrandToEdit(null);
+    setModalOpen(true);
+  };
+
+  const handleEdit = (brand) => {
+    setBrandToEdit(brand);
+    setModalOpen(true);
+  };
+
   const handleSubmit = async (formData) => {
     if (brandToEdit) await updateBrand(brandToEdit._id, formData);
     else await createBrand(formData);
     fetchBrands();
     setModalOpen(false);
   };
-  const handleSoftDelete = async (id) => { await softDeleteBrand(id); fetchBrands(); };
-  
+  const handleSoftDelete = async (id) => {
+    await softDeleteBrand(id);
+    fetchBrands();
+  };
+
   const handleDelete = async (id) => {
-  const confirm = window.confirm("Are you sure you want to permanently delete this brand?");
-  if (!confirm) return;
-  await deleteBrand(id);
-  fetchBrands();
-};
+    const confirm = window.confirm("Are you sure you want to permanently delete this brand?");
+    if (!confirm) return;
+    await deleteBrand(id);
+    fetchBrands();
+  };
   const handleRestore = fetchBrands;
 
   return (
@@ -58,6 +73,8 @@ function App() {
             onSoftDelete={handleSoftDelete}
             onRestore={handleRestore}
             onDelete={handleDelete}
+            loading={loading}
+
           />
         </div>
       </div>
@@ -69,6 +86,8 @@ function App() {
           onClose={() => setModalOpen(false)}
           onSubmit={handleSubmit}
           brandToEdit={brandToEdit}
+          
+
         />
       </Modal>
     </div>
